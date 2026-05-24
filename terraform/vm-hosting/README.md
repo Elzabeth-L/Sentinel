@@ -1,6 +1,6 @@
 # VM Hosting Terraform
 
-This Terraform tree provisions only the **application hosting runtime** for the Azure-Native Kubernetes Environment Governance & Resource Optimization Platform.
+This Terraform tree provisions only the **application hosting runtime** for Sentinel, the Azure-native cloud resource lifecycle governance and optimization platform.
 
 It intentionally does **not** provision:
 
@@ -11,7 +11,7 @@ It intentionally does **not** provision:
 - App Service
 - monitoring stacks
 
-AKS environments are expected to live in a separate infrastructure repository. This VM exists so Phase 1 has professional public URLs, SSL termination, and a stable runtime for the Next.js frontend, FastAPI backend, Nginx, Docker, Azure CLI, and AKS governance services.
+Target cloud resources, including AKS environments, are expected to live in separate infrastructure repositories. This VM exists so Phase 1 has professional public URLs, SSL termination, and a stable runtime for the Next.js frontend, FastAPI backend, Nginx, Docker, Azure CLI, and Sentinel governance services.
 
 ## Architecture
 
@@ -27,12 +27,12 @@ Ubuntu 22.04 VM
 Nginx reverse proxy + Let's Encrypt
   |
 +----------------------+----------------------+
-| governance.vaultrix.in        api.governance.vaultrix.in |
+| sentinel.vaultrix.in          api.sentinel.vaultrix.in   |
 | Next.js frontend :3000        FastAPI backend :8000      |
 +----------------------+----------------------+
 ```
 
-The VM can use a system-assigned managed identity. Assign Azure RBAC roles to that identity so the backend can discover AKS clusters and query Azure APIs without storing Azure credentials on the VM.
+The VM can use a system-assigned managed identity. Assign Azure RBAC roles to that identity so the backend can discover Azure resources, query Azure APIs, and inspect AKS clusters without storing Azure credentials on the VM.
 
 Recommended roles for the VM managed identity, scoped as narrowly as possible:
 
@@ -140,14 +140,14 @@ Create two **A records** pointing to the Terraform output `vm_public_ip`.
 
 | Type | Name | Value |
 | --- | --- | --- |
-| A | `governance` | `<VM_PUBLIC_IP>` |
-| A | `api.governance` | `<VM_PUBLIC_IP>` |
+| A | `sentinel` | `<VM_PUBLIC_IP>` |
+| A | `api.sentinel` | `<VM_PUBLIC_IP>` |
 
 This creates:
 
 ```text
-governance.vaultrix.in
-api.governance.vaultrix.in
+sentinel.vaultrix.in
+api.sentinel.vaultrix.in
 ```
 
 Use A records because this Terraform creates a static public IP. If you later move to Azure Container Apps or Front Door, use CNAME records to the Azure-provided hostname instead.
@@ -155,8 +155,8 @@ Use A records because this Terraform creates a static public IP. If you later mo
 DNS may take several minutes to propagate. Verify:
 
 ```bash
-nslookup governance.vaultrix.in
-nslookup api.governance.vaultrix.in
+nslookup sentinel.vaultrix.in
+nslookup api.sentinel.vaultrix.in
 ```
 
 ## VM Bootstrap
@@ -214,7 +214,7 @@ Use this HTTP-first config before issuing certificates:
 ```nginx
 server {
     listen 80;
-    server_name governance.vaultrix.in;
+    server_name sentinel.vaultrix.in;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -230,7 +230,7 @@ server {
 
 server {
     listen 80;
-    server_name api.governance.vaultrix.in;
+    server_name api.sentinel.vaultrix.in;
 
     location / {
         proxy_pass http://127.0.0.1:8000;
@@ -257,8 +257,8 @@ After DNS points to the VM public IP and Nginx responds on HTTP:
 
 ```bash
 sudo certbot --nginx \
-  -d governance.vaultrix.in \
-  -d api.governance.vaultrix.in
+  -d sentinel.vaultrix.in \
+  -d api.sentinel.vaultrix.in
 ```
 
 Choose the HTTPS redirect option when prompted.
@@ -277,20 +277,20 @@ Once SSL is working, configure Microsoft Entra:
 Frontend SPA redirect URI:
 
 ```text
-https://governance.vaultrix.in/auth/callback
+https://sentinel.vaultrix.in/auth/callback
 ```
 
 Frontend environment:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://api.governance.vaultrix.in/api/v1
-NEXT_PUBLIC_AZURE_REDIRECT_URI=https://governance.vaultrix.in/auth/callback
+NEXT_PUBLIC_API_BASE_URL=https://api.sentinel.vaultrix.in/api/v1
+NEXT_PUBLIC_AZURE_REDIRECT_URI=https://sentinel.vaultrix.in/auth/callback
 ```
 
 Backend environment:
 
 ```env
-BACKEND_CORS_ORIGINS=https://governance.vaultrix.in
+BACKEND_CORS_ORIGINS=["https://sentinel.vaultrix.in","http://sentinel.vaultrix.in"]
 ```
 
 ## Future Migration
@@ -303,4 +303,3 @@ This VM-first design is for Phase 1 pitching and public URL readiness. Later pha
 - Azure Front Door in front of any of the above
 
 The domain strategy can remain stable while the backend target changes.
-

@@ -1,6 +1,6 @@
-# Azure-Native Kubernetes Environment Governance & Resource Optimization Platform
+# Sentinel
 
-Enterprise-grade operational governance and optimization intelligence layer for Azure Kubernetes Service environments.
+Enterprise-grade Azure-native cloud resource lifecycle governance and optimization intelligence platform. AKS governance is the first deep integration, but the product direction covers the lifecycle, hygiene, ownership, and efficiency of Azure resources as a whole.
 
 This repository is structured as a production-oriented full-stack platform, not a toy dashboard. The current implementation includes the first end-to-end increment: FastAPI foundation, Microsoft Entra-ready auth boundaries, deterministic governance and optimization engines, Next.js App Router shell, demo simulation data, Docker, Helm, Terraform foundations, CI, and engineering documentation.
 
@@ -8,11 +8,39 @@ This repository is structured as a production-oriented full-stack platform, not 
 
 - Frontend: Next.js App Router, TypeScript, Tailwind CSS, React Query, Zustand, Framer Motion, Recharts
 - Backend: FastAPI, SQLAlchemy, Pydantic, PostgreSQL, Redis
-- Cloud: Azure, AKS, Azure Monitor, Managed Prometheus, Resource Graph, ACR, Key Vault, Managed Grafana
+- Cloud: Azure, Azure Resource Graph, AKS, Azure Monitor, Managed Prometheus, ACR, Key Vault, Managed Grafana
 - Infrastructure: Terraform, Docker, Kubernetes, Helm
 - Observability: Prometheus metrics endpoint, structured JSON logging, health probes
 
-## Local Development
+## Phase 1 VM Deployment
+
+The Phase 1 presentation runtime uses:
+
+```text
+https://sentinel.vaultrix.in
+https://api.sentinel.vaultrix.in
+```
+
+Use the VM hosting Terraform and deployment guide in [terraform/vm-hosting/README.md](./terraform/vm-hosting/README.md).
+
+Frontend environment:
+
+```env
+NEXT_PUBLIC_DEMO_MODE=true
+NEXT_PUBLIC_API_BASE_URL=https://api.sentinel.vaultrix.in/api/v1
+NEXT_PUBLIC_AZURE_REDIRECT_URI=https://sentinel.vaultrix.in/auth/callback
+```
+
+Backend environment:
+
+```env
+DEMO_MODE=true
+BACKEND_CORS_ORIGINS=["https://sentinel.vaultrix.in","http://sentinel.vaultrix.in"]
+```
+
+## Local Development Fallback
+
+Local development remains available for engineering work, but it is not the Phase 1 presentation path.
 
 1. Copy environment values:
 
@@ -44,17 +72,17 @@ npm install
 npm run dev
 ```
 
-5. Open `http://localhost:3000`.
+5. For the presentation path, build and run this on the VM behind Nginx, then open `https://sentinel.vaultrix.in`.
 
 Demo mode uses `demo-token` and seeded AKS governance data. Disable `DEMO_MODE` and `NEXT_PUBLIC_DEMO_MODE` when wiring real Microsoft Entra ID and Azure integrations.
 
-If Node.js is not available on a restricted laptop, you can still test a friendly backend-served preview UI after starting FastAPI:
+If Node.js is not available on a restricted laptop, use the VM-hosted Sentinel URL instead of trying to run the frontend locally:
 
 ```text
-http://localhost:8000/console
+https://sentinel.vaultrix.in
 ```
 
-For Microsoft Entra local login, see [docs/entra-local-login.md](./docs/entra-local-login.md).
+For Microsoft Entra setup, see [docs/entra-local-login.md](./docs/entra-local-login.md).
 
 ## Important Files
 
@@ -62,7 +90,8 @@ For Microsoft Entra local login, see [docs/entra-local-login.md](./docs/entra-lo
 - [backend/app/services/optimization_engine.py](./backend/app/services/optimization_engine.py): deterministic recommendation rules
 - [backend/app/services/governance_engine.py](./backend/app/services/governance_engine.py): namespace lifecycle rules
 - [frontend/app/page.tsx](./frontend/app/page.tsx): dashboard shell
-- [infra/terraform/environments/dev/main.tf](./infra/terraform/environments/dev/main.tf): dev infrastructure composition
+- [terraform/vm-hosting/README.md](./terraform/vm-hosting/README.md): Phase 1 public VM hosting guide
+- [infra/terraform/environments/dev/main.tf](./infra/terraform/environments/dev/main.tf): future Azure infrastructure composition
 - [helm/aks-governance/values.yaml](./helm/aks-governance/values.yaml): AKS deployment configuration
 
 ## Current Status

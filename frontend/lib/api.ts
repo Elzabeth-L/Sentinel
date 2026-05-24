@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/lib/store";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/v1";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.sentinel.vaultrix.in/api/v1";
 
 export async function apiGet<T>(path: string): Promise<T> {
   const token = useAuthStore.getState().accessToken;
@@ -18,4 +18,3 @@ export async function apiGet<T>(path: string): Promise<T> {
 
   return response.json() as Promise<T>;
 }
-

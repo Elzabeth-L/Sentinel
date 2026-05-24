@@ -14,7 +14,7 @@ def demo_console() -> HTMLResponse:
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AKS Governance Console</title>
+    <title>Sentinel Console</title>
     <style>
       :root {
         --bg: #f6f8fb;

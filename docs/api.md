@@ -15,7 +15,7 @@ Base path: `/api/v1`
 
 ## Clusters
 
-- `GET /clusters`: list accessible AKS clusters. Demo mode returns seeded clusters.
+- `GET /clusters`: list accessible AKS clusters. Demo mode returns seeded clusters. AKS is the first deep resource integration; future APIs should add broader Azure resource inventory without forcing all resource governance through the cluster model.
 - `POST /clusters/onboard`: onboard a discovered cluster. Requires Platform Engineer or Admin.
 
 ## Governance
@@ -40,4 +40,3 @@ Rules currently implemented:
 - CPU p95/request ratio below 25 percent
 - memory p95/request ratio below 35 percent
 - zero replicas and zero usage
-

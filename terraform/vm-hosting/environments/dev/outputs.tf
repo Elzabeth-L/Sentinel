@@ -20,16 +20,15 @@ output "ssh_command" {
 
 output "frontend_dns_record" {
   description = "Recommended frontend DNS A record."
-  value       = "governance.vaultrix.in -> ${module.public_ip.ip_address}"
+  value       = "sentinel.vaultrix.in -> ${module.public_ip.ip_address}"
 }
 
 output "api_dns_record" {
   description = "Recommended backend API DNS A record."
-  value       = "api.governance.vaultrix.in -> ${module.public_ip.ip_address}"
+  value       = "api.sentinel.vaultrix.in -> ${module.public_ip.ip_address}"
 }
 
 output "vm_principal_id" {
   description = "System-assigned managed identity principal id. Use this for Azure RBAC assignments."
   value       = module.vm.principal_id
 }
-

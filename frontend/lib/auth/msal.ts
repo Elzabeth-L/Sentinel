@@ -2,7 +2,7 @@ import { PublicClientApplication, type Configuration } from "@azure/msal-browser
 
 const tenantId = process.env.NEXT_PUBLIC_AZURE_TENANT_ID ?? "common";
 const clientId = process.env.NEXT_PUBLIC_AZURE_CLIENT_ID ?? "";
-const redirectUri = process.env.NEXT_PUBLIC_AZURE_REDIRECT_URI ?? "http://localhost:3000/auth/callback";
+const redirectUri = process.env.NEXT_PUBLIC_AZURE_REDIRECT_URI ?? "https://sentinel.vaultrix.in/auth/callback";
 const apiScope = process.env.NEXT_PUBLIC_AZURE_API_SCOPE ?? `${clientId}/.default`;
 
 export const msalConfig: Configuration = {

@@ -1,8 +1,8 @@
-# Project Brain: AKS Governance & Resource Optimization Platform
+# Project Brain: Sentinel Resource Lifecycle Governance Platform
 
 ## Project Context
 
-This repository implements an enterprise-grade, Azure-native Kubernetes environment governance and resource optimization platform for AKS. It is not intended to be a generic monitoring dashboard. It is an operational governance intelligence layer that evaluates namespace lifecycle hygiene, stale environments, ownership metadata, workload efficiency, and cleanup candidates using Azure, Kubernetes, Prometheus, and Azure Monitor signals.
+This repository implements Sentinel, an enterprise-grade Azure-native resource lifecycle governance and optimization platform. AKS governance is the first deep integration, but the product must not be treated as AKS-only. Sentinel should govern the lifecycle, ownership, hygiene, efficiency, and cleanup readiness of Azure resources as a whole, using Azure Resource Graph, Azure APIs, Kubernetes APIs, Prometheus, and Azure Monitor signals.
 
 The user specifically requested production-oriented architecture, clean modular code, strong UI/UX, Microsoft Entra ID authentication, deterministic explainable recommendations, demo simulation support, Terraform, Helm, Docker, Kubernetes manifests, CI/CD, testing, documentation, and a maintainable handoff file. This file is the handoff source of truth for future sessions.
 
@@ -72,9 +72,22 @@ docs/                 architecture, API, deployment, diagrams
 - Use two Microsoft Entra app registrations: one SPA app for frontend sign-in and one backend API app for scopes/audience.
 - Use Microsoft Entra ID app roles for authorization. Backend role checks are required even if frontend hides navigation items.
 - Use service-side Azure credentials for Azure operations. Locally this is `DefaultAzureCredential`; in AKS mode this should be Azure Workload Identity / managed identity rather than forwarded user tokens.
-- Use Terraform modules from the start so AKS and non-Kubernetes Azure deployment modes can evolve independently.
+- Use Terraform modules from the start so Sentinel hosting, AKS target infrastructure, and future broader Azure resource governance can evolve independently.
 - Phase 1 presentation hosting uses a VM-first runtime because the user needs professional public URLs immediately, with DNS and SSL, while delaying Container Apps/App Service and AI Foundry to Phase 2.
-- The VM hosting Terraform is intentionally separated under `terraform/vm-hosting` and must not provision AKS clusters. AKS infrastructure will live in a separate future repository.
+- The VM hosting Terraform is intentionally separated under `terraform/vm-hosting` and must not provision AKS clusters or governed target resources. AKS and other governed Azure resource infrastructure will live in separate future repositories.
+
+## Product Scope Correction
+
+Sentinel is not just an AKS cluster governance product. The Phase 1 implementation currently goes deepest on AKS because namespaces, workloads, quotas, and utilization provide a strong demo surface. The architectural direction is broader:
+
+- Azure resource lifecycle governance across subscriptions/resource groups.
+- Ownership and tagging hygiene for Azure resources.
+- Stale, orphaned, idle, or unmanaged resource detection.
+- Cleanup candidate analysis and approval workflows.
+- AKS namespace/workload governance as one resource-family adapter.
+- Future adapters for compute, networking, storage, databases, container registries, and other Azure services.
+
+When extending the codebase, avoid naming new generic concepts as if they only belong to AKS. Prefer `resources`, `inventory`, `governance`, `lifecycle`, and `optimization` abstractions, with AKS-specific code isolated behind AKS adapters.
 
 ## Technology Stack Decisions
 
@@ -104,7 +117,7 @@ Real Entra flow intended behavior:
 3. Frontend sends the token to FastAPI.
 4. Backend validates signature using Entra JWKS, checks issuer, audience, expiry, tenant allow-list, roles, and scopes.
 5. Backend dependencies enforce Admin or Platform Engineer access where required.
-6. Backend uses `DefaultAzureCredential` or managed identity for Azure Resource Graph, AKS, and Azure Monitor operations.
+6. Backend uses `DefaultAzureCredential` or managed identity for Azure Resource Graph, Azure resource discovery, AKS, and Azure Monitor operations.
 
 Important next hardening task:
 
@@ -169,8 +182,8 @@ Bootstrap:
 
 DNS strategy:
 
-- `governance.vaultrix.in` is an A record pointing to the VM public IP and reverse proxies to the Next.js frontend.
-- `api.governance.vaultrix.in` is an A record pointing to the same VM public IP and reverse proxies to the FastAPI backend.
+- `sentinel.vaultrix.in` is an A record pointing to the VM public IP and reverse proxies to the Next.js frontend.
+- `api.sentinel.vaultrix.in` is an A record pointing to the same VM public IP and reverse proxies to the FastAPI backend.
 - A records are correct for this Phase 1 VM plan because Terraform provisions a static public IP.
 
 SSL strategy:
@@ -178,12 +191,12 @@ SSL strategy:
 - Nginx listens on ports 80/443.
 - Let's Encrypt certificates are issued with Certbot after DNS propagation.
 - Certbot configures HTTPS redirection and renewal through the system timer.
-- Microsoft Entra redirect URI should be `https://governance.vaultrix.in/auth/callback` once SSL is active.
+- Microsoft Entra redirect URI should be `https://sentinel.vaultrix.in/auth/callback` once SSL is active.
 
 Managed identity strategy:
 
 - The VM can have a system-assigned managed identity enabled by Terraform.
-- Assign Azure RBAC roles to that identity for real AKS discovery: Reader, Azure Kubernetes Service Cluster User Role, and Monitoring Reader.
+- Assign Azure RBAC roles to that identity for real Azure resource and AKS discovery. Minimum Phase 1 roles are Reader, Azure Kubernetes Service Cluster User Role, and Monitoring Reader. Scope roles narrowly where possible.
 - This is cleaner than storing Azure credentials on the VM and aligns with the backend `DefaultAzureCredential` path.
 
 Future migration:
@@ -234,9 +247,9 @@ Phase 1 VM Hosting Mode:
 
 - Terraform under `terraform/vm-hosting` creates a public Ubuntu VM, static IP, NSG, VNet/subnet, and optional managed identity.
 - Nginx terminates SSL and reverse proxies:
-  - `governance.vaultrix.in` to frontend on `127.0.0.1:3000`
-  - `api.governance.vaultrix.in` to backend on `127.0.0.1:8000`
-- This mode exists only to host the application platform for the pitch/presentation. It does not create or manage target AKS environments.
+  - `sentinel.vaultrix.in` to frontend on `127.0.0.1:3000`
+  - `api.sentinel.vaultrix.in` to backend on `127.0.0.1:8000`
+- This mode exists only to host the application platform for the pitch/presentation. It does not create or manage target Azure resources or AKS environments.
 
 ## Environment Variables
 
@@ -278,14 +291,14 @@ Implemented:
 Pending:
 
 - Integration tests for auth middleware.
-- Mocked Azure Resource Graph tests.
+- Mocked Azure Resource Graph and Azure resource inventory tests.
 - Mocked Kubernetes API tests.
 - Frontend component tests for tables, navigation, and loading states.
 - API contract tests for governance and recommendation payloads.
 
 ## Known Gaps
 
-- Real Azure Resource Graph integration is still a hook in `AzureInventoryClient`.
+- Broad Azure Resource Graph inventory beyond AKS is still a hook/future adapter area.
 - Real AKS discovery through `ContainerServiceClient` is implemented in `AzureInventoryClient`.
 - Real Kubernetes API inventory through AKS user credentials and the Kubernetes Python client is implemented in `KubernetesInventoryClient`.
 - Real Azure Managed Prometheus queries are still a hook in `WorkloadMetricsClient`.
@@ -301,19 +314,23 @@ Next increment:
 
 1. Add Alembic migrations.
 2. Persist onboarded clusters and namespace reports.
-3. Harden real AKS discovery error handling and subscription filtering.
-4. Add Kubernetes RBAC diagnostics for denied namespace/workload reads.
-5. Implement Managed Prometheus query adapter.
-6. Harden auth with backend session exchange and refresh strategy.
-7. Add PostgreSQL and Redis Terraform modules.
-8. Add Container Apps frontend/backend resources.
-9. Add mocked Azure/Kubernetes integration tests.
+3. Add a generic Azure resource inventory API backed by Azure Resource Graph.
+4. Harden real AKS discovery error handling and subscription filtering.
+5. Add Kubernetes RBAC diagnostics for denied namespace/workload reads.
+6. Implement Managed Prometheus query adapter.
+7. Harden auth with backend session exchange and refresh strategy.
+8. Add PostgreSQL and Redis Terraform modules.
+9. Add Container Apps frontend/backend resources.
+10. Add mocked Azure/Kubernetes integration tests.
 
 Later increments:
 
 - Namespace policy templates.
+- Azure resource lifecycle policy templates.
 - Cleanup approval workflow.
 - Audit event viewer.
+- Resource group and subscription hygiene dashboards.
+- Tagging/ownership compliance for non-AKS resources.
 - Cost model calibration using Azure retail prices or Cost Management exports.
 - Managed Grafana dashboard provisioning.
 - Multi-tenant tenant isolation model.
@@ -324,11 +341,11 @@ Later increments:
 - If backend startup fails on PostgreSQL, run `docker compose up -d` from the repo root.
 - Schema creation is explicit. Use Alembic after the migration layer is added; `AUTO_CREATE_SCHEMA=true` is only a temporary local escape hatch.
 - If auth fails locally, ensure `DEMO_MODE=true` and `NEXT_PUBLIC_DEMO_MODE=true`.
-- If frontend API calls fail, confirm backend is running on `http://localhost:8000`.
-- If Node.js is unavailable, run only the backend and open `http://localhost:8000/console` to test a user-friendly preview UI.
+- If frontend API calls fail in Phase 1, confirm `NEXT_PUBLIC_API_BASE_URL=https://api.sentinel.vaultrix.in/api/v1` was set before the frontend build and that Nginx proxies `api.sentinel.vaultrix.in` to backend port `8000`.
+- If Node.js is unavailable on the company laptop, use the VM-hosted frontend at `https://sentinel.vaultrix.in` instead of relying on local browser testing.
 - If the frontend shows MSAL `interaction_in_progress`, use the login page **Reset sign-in state** button, then restart the frontend after confirming `frontend/.env.local`.
 - If Terraform validation fails due provider downloads, run `terraform init` with network access.
-- For Phase 1 VM hosting, use `terraform/vm-hosting/README.md`. After apply, create GoDaddy A records for `governance` and `api.governance` pointing to the VM public IP, then run Certbot on the VM.
+- For Phase 1 VM hosting, use `terraform/vm-hosting/README.md`. After apply, create GoDaddy A records for `sentinel` and `api.sentinel` pointing to the VM public IP, then run Certbot on the VM.
 - On May 25, 2026, `Standard_B2s` was unavailable/restricted in Central India for the active subscription. The live dev VM tfvars was changed to `Standard_L2as_v4` to continue provisioning.
 - If Helm lint complains about empty secrets, pass non-empty values or use a development override file.
 

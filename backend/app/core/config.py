@@ -5,13 +5,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    app_name: str = "AKS Governance Platform"
-    app_env: str = "local"
-    app_base_url: str = "http://localhost:3000"
-    api_base_url: str = "http://localhost:8000"
+    app_name: str = "Sentinel"
+    app_env: str = "dev"
+    app_base_url: str = "https://sentinel.vaultrix.in"
+    api_base_url: str = "https://api.sentinel.vaultrix.in"
     database_url: str = "postgresql+psycopg://aks_governance:aks_governance@localhost:5432/aks_governance"
     redis_url: str = "redis://localhost:6379/0"
-    backend_cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    backend_cors_origins: list[str] = Field(default_factory=lambda: ["https://sentinel.vaultrix.in"])
     session_secret: str = "local-development-secret-change-me"
     demo_mode: bool = True
     auto_create_schema: bool = False

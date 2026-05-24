@@ -47,7 +47,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-sm font-semibold">AKS Governance</p>
+            <p className="text-sm font-semibold">Sentinel</p>
             <p className="text-xs text-muted-foreground">Azure-native operations</p>
           </div>
         </div>

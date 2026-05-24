@@ -1,21 +1,21 @@
-# Microsoft Entra Local Login Setup
+# Microsoft Entra Login Setup For Sentinel
 
 The enterprise architecture uses **two** Microsoft Entra app registrations:
 
 - Frontend SPA app: signs the user in.
 - Backend API app: protects FastAPI and exposes API scopes.
 
-The frontend requests an access token for the backend API. The backend validates that token. Azure discovery and AKS operations are performed by the backend using `DefaultAzureCredential`, which maps cleanly to local developer credentials now and managed identity later.
+The frontend requests an access token for the backend API. The backend validates that token. Azure resource discovery and AKS operations are performed by the backend using `DefaultAzureCredential`, which maps cleanly to managed identity on the VM.
 
 ## App Registration 1: Frontend SPA
 
 Create an app registration:
 
 ```text
-Name: AKS Governance Frontend Local
+Name: Sentinel Frontend
 Supported account types: Accounts in this organizational directory only
 Platform: Single-page application
-Redirect URI: http://localhost:3000/auth/callback
+Redirect URI: https://sentinel.vaultrix.in/auth/callback
 ```
 
 Copy:
@@ -32,7 +32,7 @@ Do not create a client secret for the SPA.
 Create another app registration:
 
 ```text
-Name: AKS Governance Backend API Local
+Name: Sentinel Backend API
 Supported account types: Accounts in this organizational directory only
 ```
 
@@ -54,10 +54,10 @@ Add a delegated scope:
 ```text
 Scope name: access_as_user
 Who can consent: Admins and users
-Admin consent display name: Access AKS Governance Platform
-Admin consent description: Allows the frontend to call the AKS Governance backend as the signed-in user.
-User consent display name: Access AKS Governance Platform
-User consent description: Allows the app to call the AKS Governance backend as you.
+Admin consent display name: Access Sentinel
+Admin consent description: Allows the frontend to call the Sentinel backend as the signed-in user.
+User consent display name: Access Sentinel
+User consent description: Allows the app to call the Sentinel backend as you.
 State: Enabled
 ```
 
@@ -74,7 +74,7 @@ In the **Frontend SPA** app registration:
 1. Open **API permissions**.
 2. Click **Add a permission**.
 3. Select **My APIs**.
-4. Select `AKS Governance Backend API Local`.
+4. Select `Sentinel Backend API`.
 5. Select delegated permission `access_as_user`.
 6. Add permissions.
 7. If your tenant requires it, ask an admin to grant consent.
@@ -85,14 +85,14 @@ Edit `frontend/.env.local`:
 
 ```env
 NEXT_PUBLIC_DEMO_MODE=false
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
+NEXT_PUBLIC_API_BASE_URL=https://api.sentinel.vaultrix.in/api/v1
 NEXT_PUBLIC_AZURE_TENANT_ID=<TENANT_ID>
 NEXT_PUBLIC_AZURE_CLIENT_ID=<FRONTEND_APP_CLIENT_ID>
 NEXT_PUBLIC_AZURE_API_SCOPE=api://<BACKEND_APP_CLIENT_ID>/access_as_user
-NEXT_PUBLIC_AZURE_REDIRECT_URI=http://localhost:3000/auth/callback
+NEXT_PUBLIC_AZURE_REDIRECT_URI=https://sentinel.vaultrix.in/auth/callback
 ```
 
-Restart `npm.cmd run dev` after editing this file.
+Rebuild and restart the frontend after editing this file.
 
 ## Backend Configuration
 
@@ -106,7 +106,7 @@ AZURE_API_AUDIENCE=api://<BACKEND_APP_CLIENT_ID>
 AZURE_ALLOWED_TENANTS=<TENANT_ID>
 AZURE_OPERATION_AUTH_MODE=default_credential
 AZURE_SUBSCRIPTION_IDS=<OPTIONAL_COMMA_SEPARATED_SUBSCRIPTION_IDS>
-BACKEND_CORS_ORIGINS=http://localhost:3000
+BACKEND_CORS_ORIGINS=["https://sentinel.vaultrix.in","http://sentinel.vaultrix.in"]
 ```
 
 Restart Uvicorn after editing this file.
@@ -115,7 +115,7 @@ Restart Uvicorn after editing this file.
 
 Assign these Azure RBAC roles to the identity used by the backend Azure credential.
 
-For local testing with `DefaultAzureCredential`, that is usually your signed-in Azure CLI or developer account:
+For the Phase 1 VM, assign these roles to the VM managed identity. For developer testing, the same roles can be assigned to your signed-in Azure CLI account:
 
 ```text
 Reader
@@ -151,4 +151,3 @@ Use one of these:
 - Click **Reset sign-in state** on the login page.
 - Open `https://login.microsoftonline.com/logout.srf`.
 - Use an incognito browser window.
-
