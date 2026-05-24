@@ -1,5 +1,5 @@
 from azure.mgmt.containerservice import ContainerServiceClient
-from azure.mgmt.resource import SubscriptionClient
+from azure.mgmt.subscription import SubscriptionClient
 
 from app.core.config import settings
 from app.schemas.auth import AuthenticatedPrincipal
