@@ -1,0 +1,26 @@
+resource_group_name = "rg-aks-governance-host-dev"
+location            = "centralindia"
+name_prefix         = "aks-gov"
+vm_name             = "aks-gov-host-dev"
+vm_size             = "Standard_B2s"
+admin_username      = "azureuser"
+ssh_public_key_path = "~/.ssh/id_rsa.pub"
+
+vnet_cidr   = "10.70.0.0/16"
+subnet_cidr = "10.70.1.0/24"
+
+# For a pitch/demo, replace this with your current public IP in /32 form.
+# Example: ["203.0.113.10/32"]
+allowed_ssh_source_cidrs = ["0.0.0.0/0"]
+
+enable_system_assigned_identity = true
+
+tags = {
+  project      = "aks-governance-platform"
+  environment  = "dev"
+  owner        = "platform-engineering"
+  managed_by   = "terraform"
+  cost_center  = "demo"
+  architecture = "vm-hosting"
+}
+

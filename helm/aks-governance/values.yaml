@@ -1,0 +1,37 @@
+global:
+  imagePullSecrets: []
+
+frontend:
+  image:
+    repository: acr.azurecr.io/aks-governance-frontend
+    tag: "0.1.0"
+  replicas: 2
+  env:
+    NEXT_PUBLIC_API_BASE_URL: /api/v1
+    NEXT_PUBLIC_DEMO_MODE: "true"
+
+backend:
+  image:
+    repository: acr.azurecr.io/aks-governance-api
+    tag: "0.1.0"
+  replicas: 2
+  env:
+    APP_ENV: production
+    DEMO_MODE: "false"
+  secretEnv:
+    DATABASE_URL: ""
+    REDIS_URL: ""
+    SESSION_SECRET: ""
+    AZURE_CLIENT_SECRET: ""
+
+ingress:
+  enabled: true
+  className: webapprouting.kubernetes.azure.com
+  host: aks-governance.example.com
+  tlsSecretName: aks-governance-tls
+
+serviceAccount:
+  create: true
+  name: aks-governance
+  azureWorkloadIdentityClientId: ""
+

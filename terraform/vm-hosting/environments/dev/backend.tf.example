@@ -1,0 +1,12 @@
+# Copy this file to backend.tf only when you are ready to use remote state.
+# Create the storage account/container separately or through an approved platform process.
+#
+# terraform {
+#   backend "azurerm" {
+#     resource_group_name  = "rg-tfstate"
+#     storage_account_name = "sttfstatevaultrix"
+#     container_name       = "tfstate"
+#     key                  = "aks-governance-vm-hosting-dev.tfstate"
+#   }
+# }
+
