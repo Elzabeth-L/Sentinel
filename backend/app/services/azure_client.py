@@ -1,9 +1,12 @@
 from azure.mgmt.containerservice import ContainerServiceClient
+from azure.mgmt.resourcegraph import ResourceGraphClient
+from azure.mgmt.resourcegraph.models import QueryRequest
 from azure.mgmt.subscription import SubscriptionClient
 
 from app.core.config import settings
 from app.schemas.auth import AuthenticatedPrincipal
 from app.schemas.cluster import ClusterSummary
+from app.schemas.resource import AzureResourceSummary
 from app.services.azure_credentials import get_azure_operation_credential
 
 
@@ -57,6 +60,23 @@ class AzureInventoryClient:
                 )
 
         return clusters
+
+    async def list_resources(self) -> list[AzureResourceSummary]:
+        subscription_ids = settings.azure_subscription_ids or self._discover_subscription_ids()
+        query = """
+        Resources
+        | project id, name, type, resourceGroup, subscriptionId, location, kind, tags
+        | order by type asc, name asc
+        """
+        client = ResourceGraphClient(get_azure_operation_credential())
+        response = client.resources(
+            QueryRequest(
+                subscriptions=subscription_ids,
+                query=query,
+                options={"resultFormat": "objectArray"},
+            )
+        )
+        return [AzureResourceSummary.model_validate(item) for item in response.data or []]
 
     def _discover_subscription_ids(self) -> list[str]:
         client = SubscriptionClient(get_azure_operation_credential())

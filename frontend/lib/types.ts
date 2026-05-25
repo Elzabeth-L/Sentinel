@@ -11,6 +11,28 @@ export interface ClusterSummary {
   onboarding_state: string;
 }
 
+export interface AzureResourceSummary {
+  id: string;
+  name: string;
+  type: string;
+  resource_group: string;
+  subscription_id: string;
+  location: string;
+  kind: string | null;
+  tags: Record<string, string>;
+}
+
+export interface AzureResourceSummary {
+  id: string;
+  name: string;
+  type: string;
+  resource_group: string;
+  subscription_id: string;
+  location: string;
+  kind: string | null;
+  tags: Record<string, string>;
+}
+
 export interface NamespaceGovernanceReport {
   namespace: string;
   owner: string | null;
@@ -37,4 +59,3 @@ export interface OptimizationRecommendation {
   estimated_monthly_waste_usd: number;
   action: string;
 }
-

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Boxes, Gauge, LayoutDashboard, Moon, Search, ShieldCheck, Sun, UserCircle } from "lucide-react";
+import { Bell, Boxes, Gauge, LayoutDashboard, Moon, Search, Server, ShieldCheck, Sun, UserCircle } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,6 +11,7 @@ import { useAuthStore } from "@/lib/store";
 
 const nav = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, roles: ["Admin", "Platform Engineer", "Viewer"] },
+  { href: "/resources", label: "Resources", icon: Server, roles: ["Admin", "Platform Engineer", "Viewer"] },
   { href: "/clusters", label: "Clusters", icon: Boxes, roles: ["Admin", "Platform Engineer", "Viewer"] },
   { href: "/governance", label: "Governance", icon: ShieldCheck, roles: ["Admin", "Platform Engineer", "Viewer"] },
   { href: "/recommendations", label: "Optimization", icon: Gauge, roles: ["Admin", "Platform Engineer"] }

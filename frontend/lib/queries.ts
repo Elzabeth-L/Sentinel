@@ -1,11 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiGet } from "@/lib/api";
-import type { ClusterSummary, NamespaceGovernanceReport, OptimizationRecommendation } from "@/lib/types";
+import type {
+  AzureResourceSummary,
+  ClusterSummary,
+  NamespaceGovernanceReport,
+  OptimizationRecommendation
+} from "@/lib/types";
 
 export function useClusters() {
   return useQuery({
     queryKey: ["clusters"],
     queryFn: () => apiGet<ClusterSummary[]>("/clusters")
+  });
+}
+
+export function useResources() {
+  return useQuery({
+    queryKey: ["resources"],
+    queryFn: () => apiGet<AzureResourceSummary[]>("/resources")
   });
 }
 
@@ -24,4 +36,3 @@ export function useRecommendations(clusterId: string) {
     enabled: Boolean(clusterId)
   });
 }
-
