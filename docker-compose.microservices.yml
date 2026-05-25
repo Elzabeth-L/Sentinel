@@ -1,0 +1,36 @@
+services:
+  identity-service:
+    build:
+      context: .
+      dockerfile: services/identity-service/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8101:8101"
+
+  inventory-service:
+    build:
+      context: .
+      dockerfile: services/inventory-service/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8102:8102"
+
+  governance-service:
+    build:
+      context: .
+      dockerfile: services/governance-service/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8103:8103"
+
+  optimization-service:
+    build:
+      context: .
+      dockerfile: services/optimization-service/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8104:8104"

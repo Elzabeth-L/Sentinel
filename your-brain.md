@@ -183,8 +183,8 @@ Bootstrap:
 DNS strategy:
 
 - `sentinel.vaultrix.in` is an A record pointing to the VM public IP and reverse proxies to the Next.js frontend.
-- `api.sentinel.vaultrix.in` is an A record pointing to the same VM public IP and reverse proxies to the FastAPI backend.
-- A records are correct for this Phase 1 VM plan because Terraform provisions a static public IP.
+- API traffic should prefer same-host path routing: `https://sentinel.vaultrix.in/api/v1`.
+- `api.sentinel.vaultrix.in` can remain as a compatibility alias, but it is not required.
 
 SSL strategy:
 
@@ -248,7 +248,8 @@ Phase 1 VM Hosting Mode:
 - Terraform under `terraform/vm-hosting` creates a public Ubuntu VM, static IP, NSG, VNet/subnet, and optional managed identity.
 - Nginx terminates SSL and reverse proxies:
   - `sentinel.vaultrix.in` to frontend on `127.0.0.1:3000`
-  - `api.sentinel.vaultrix.in` to backend on `127.0.0.1:8000`
+  - `sentinel.vaultrix.in/api/` to backend on `127.0.0.1:8000`
+  - optional microservice paths to ports `8101` through `8104`
 - This mode exists only to host the application platform for the pitch/presentation. It does not create or manage target Azure resources or AKS environments.
 
 ## Environment Variables
@@ -276,6 +277,21 @@ Important frontend variables:
 - `NEXT_PUBLIC_AZURE_API_SCOPE`
 - `NEXT_PUBLIC_AZURE_REDIRECT_URI`
 - `NEXT_PUBLIC_DEMO_MODE`
+
+Preferred Phase 1 frontend API value:
+
+- `NEXT_PUBLIC_API_BASE_URL=/api/v1`
+
+## Microservice Direction
+
+The repo now contains a four-service split under `services/`:
+
+- `identity-service`: token validation and principal context, port `8101`.
+- `inventory-service`: Azure resource and AKS inventory, port `8102`.
+- `governance-service`: lifecycle governance, port `8103`.
+- `optimization-service`: resource efficiency recommendations, port `8104`.
+
+The existing `backend/` app remains the public API gateway/BFF while these services are extracted. This keeps the VM deployment stable and gives the pitch a clear microservice architecture.
 
 Never hardcode secrets. `.env.example` is the only env file intended for source control.
 

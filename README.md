@@ -18,7 +18,6 @@ The Phase 1 presentation runtime uses:
 
 ```text
 https://sentinel.vaultrix.in
-https://api.sentinel.vaultrix.in
 ```
 
 Use the VM hosting Terraform and deployment guide in [terraform/vm-hosting/README.md](./terraform/vm-hosting/README.md).
@@ -27,7 +26,7 @@ Frontend environment:
 
 ```env
 NEXT_PUBLIC_DEMO_MODE=true
-NEXT_PUBLIC_API_BASE_URL=https://api.sentinel.vaultrix.in/api/v1
+NEXT_PUBLIC_API_BASE_URL=/api/v1
 NEXT_PUBLIC_AZURE_REDIRECT_URI=https://sentinel.vaultrix.in/auth/callback
 ```
 
@@ -91,6 +90,7 @@ For Microsoft Entra setup, see [docs/entra-local-login.md](./docs/entra-local-lo
 - [backend/app/services/governance_engine.py](./backend/app/services/governance_engine.py): namespace lifecycle rules
 - [frontend/app/page.tsx](./frontend/app/page.tsx): dashboard shell
 - [terraform/vm-hosting/README.md](./terraform/vm-hosting/README.md): Phase 1 public VM hosting guide
+- [docs/microservices.md](./docs/microservices.md): four-service backend split and single-host routing
 - [infra/terraform/environments/dev/main.tf](./infra/terraform/environments/dev/main.tf): future Azure infrastructure composition
 - [helm/aks-governance/values.yaml](./helm/aks-governance/values.yaml): AKS deployment configuration
 

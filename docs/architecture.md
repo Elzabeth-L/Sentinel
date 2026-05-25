@@ -54,4 +54,4 @@ Mode A deploys the frontend and backend into AKS using Helm, Azure Workload Iden
 
 Mode B deploys the application surface to Azure Container Apps using the Terraform `container-apps` module foundation. This mode is intended for lower-operational-overhead environments or limited Azure credit demonstrations.
 
-Phase 1 currently uses a VM-hosted public runtime at `sentinel.vaultrix.in` and `api.sentinel.vaultrix.in` so the product can be pitched through real public URLs before Container Apps/App Service work begins.
+Phase 1 currently uses a VM-hosted public runtime at `sentinel.vaultrix.in` so the product can be pitched through a real public URL before Container Apps/App Service work begins. API traffic should use same-host path routing through `/api/v1`.
