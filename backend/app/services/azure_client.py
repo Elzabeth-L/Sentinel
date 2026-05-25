@@ -76,7 +76,11 @@ class AzureInventoryClient:
                 options={"resultFormat": "objectArray"},
             )
         )
-        return [AzureResourceSummary.model_validate(item) for item in response.data or []]
+        resources: list[AzureResourceSummary] = []
+        for item in response.data or []:
+            item["tags"] = item.get("tags") or {}
+            resources.append(AzureResourceSummary.model_validate(item))
+        return resources
 
     def _discover_subscription_ids(self) -> list[str]:
         client = SubscriptionClient(get_azure_operation_credential())
