@@ -38,6 +38,20 @@ export async function getMsalClient() {
   return msalClient;
 }
 
+export async function acquireAccessToken(): Promise<string> {
+  const msal = await getMsalClient();
+  const redirectResult = await msal.handleRedirectPromise();
+  const account = redirectResult?.account ?? msal.getActiveAccount() ?? msal.getAllAccounts()[0];
+
+  if (!account) {
+    return "";
+  }
+
+  msal.setActiveAccount(account);
+  const token = await msal.acquireTokenSilent({ ...loginRequest, account });
+  return token.accessToken;
+}
+
 export function clearMsalBrowserState() {
   for (const storage of [window.sessionStorage, window.localStorage]) {
     Object.keys(storage)
