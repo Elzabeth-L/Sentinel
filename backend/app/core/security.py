@@ -15,7 +15,10 @@ from app.schemas.auth import AuthenticatedPrincipal
 class TokenValidator:
     def __init__(self) -> None:
         tenant = settings.azure_tenant_id or "common"
-        self.issuer = f"https://login.microsoftonline.com/{tenant}/v2.0"
+        self.allowed_issuers = {
+            f"https://login.microsoftonline.com/{tenant}/v2.0",
+            f"https://sts.windows.net/{tenant}/",
+        }
         self.jwks_url = f"https://login.microsoftonline.com/{tenant}/discovery/v2.0/keys"
         self.audience = settings.azure_api_audience or settings.azure_client_id
         self._jwk_client = PyJWKClient(self.jwks_url)
@@ -39,8 +42,7 @@ class TokenValidator:
                 signing_key.key,
                 algorithms=["RS256"],
                 audience=self.audience,
-                issuer=self.issuer,
-                options={"require": ["exp", "iat", "iss", "aud"]},
+                options={"require": ["exp", "iat", "iss", "aud"], "verify_iss": False},
             )
         except jwt.PyJWTError as exc:
             raise HTTPException(
@@ -48,6 +50,13 @@ class TokenValidator:
                 detail="Invalid or expired bearer token.",
                 headers={"WWW-Authenticate": "Bearer"},
             ) from exc
+
+        if claims.get("iss") not in self.allowed_issuers:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token issuer.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
         tenant_id = claims.get("tid", "")
         if settings.azure_allowed_tenants and tenant_id not in settings.azure_allowed_tenants:
@@ -78,4 +87,3 @@ class TokenValidator:
 @lru_cache
 def get_token_validator() -> TokenValidator:
     return TokenValidator()
-
