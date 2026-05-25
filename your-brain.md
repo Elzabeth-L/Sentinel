@@ -110,10 +110,20 @@ Current behavior:
 - Backend accepts `Authorization: Bearer demo-token` only when `DEMO_MODE=true`.
 - Demo principal is Admin for local evaluation.
 
+Current Entra configuration decision:
+
+- User wants one Microsoft Entra app registration for Sentinel.
+- Tenant ID: `61d2b850-89ba-4674-9fc4-42d9ff6bdaa5`
+- Application/client ID: `14467cba-ecd6-4f59-a06c-b5d1b1621a93`
+- App registration name: `Sentinel Vaultrix`
+- This one app is used as both the SPA client and API audience for Phase 1.
+- Scope: `api://14467cba-ecd6-4f59-a06c-b5d1b1621a93/access_as_user`
+- Redirect URI: `https://sentinel.vaultrix.in/auth/callback`
+
 Real Entra flow intended behavior:
 
 1. Frontend redirects through MSAL authorization code flow.
-2. Entra returns an access token for the backend API app scope `api://<BACKEND_APP_CLIENT_ID>/access_as_user`.
+2. Entra returns an access token for the Sentinel scope `api://14467cba-ecd6-4f59-a06c-b5d1b1621a93/access_as_user`.
 3. Frontend sends the token to FastAPI.
 4. Backend validates signature using Entra JWKS, checks issuer, audience, expiry, tenant allow-list, roles, and scopes.
 5. Backend dependencies enforce Admin or Platform Engineer access where required.

@@ -91,6 +91,7 @@ For Microsoft Entra setup, see [docs/entra-local-login.md](./docs/entra-local-lo
 - [frontend/app/page.tsx](./frontend/app/page.tsx): dashboard shell
 - [terraform/vm-hosting/README.md](./terraform/vm-hosting/README.md): Phase 1 public VM hosting guide
 - [docs/microservices.md](./docs/microservices.md): four-service backend split and single-host routing
+- [docs/entra-single-app.md](./docs/entra-single-app.md): current one-app Microsoft Entra setup
 - [infra/terraform/environments/dev/main.tf](./infra/terraform/environments/dev/main.tf): future Azure infrastructure composition
 - [helm/aks-governance/values.yaml](./helm/aks-governance/values.yaml): AKS deployment configuration
 
